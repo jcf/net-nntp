@@ -25,6 +25,10 @@ module Net
       end
     end
     
+    def close
+      @socket.close
+    end
+    
     def _response
       Net::NNTP::Response.parse(@socket.readline)
     end
