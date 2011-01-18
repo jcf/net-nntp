@@ -27,7 +27,7 @@ module Net
         
         header_lines.each do |line|
           name, value = line.split(":", 2)
-          article_obj[name.strip.capitalize] = value.strip
+          article_obj[name.to_s.strip.capitalize] = value.to_s.strip
         end
         
         article_obj.body ||= ""
