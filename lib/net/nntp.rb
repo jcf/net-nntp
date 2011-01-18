@@ -36,9 +36,7 @@ module Net
     def read_multiline
       buffer = ""
       while true
-        puts "Reading..."
         read = @socket.readline
-        puts read
         break if read.strip == "."
         buffer += read
       end
