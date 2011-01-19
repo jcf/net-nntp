@@ -29,6 +29,7 @@ module Net
             subresult = Base64.decode64(source)
           end
           
+          subresult ||= ""
           subresult = subresult.force_encoding(charset)
           subresult = subresult.encode("utf-8", charset)
           
