@@ -23,7 +23,7 @@ module Net
           
           if encoding == "q"
             subresult = source.gsub /\=([A-Za-z0-9]{2})/ do |match|
-              match.to_i(16).chr
+              match[1..-1].to_i(16).chr
             end
           elsif encoding == "g"
             subresult = Base64.decode64(source)
