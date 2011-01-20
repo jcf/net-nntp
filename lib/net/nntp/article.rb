@@ -13,6 +13,7 @@ module Net
       end
       
       def self.decode_rfc2047(string)
+        string = string.gsub("_", "=20")
         result = {}
         
         string.scan(RFC2047_REGEXP).to_a.each do |occur|
@@ -50,10 +51,13 @@ module Net
         
         header_lines = []
         line_buffer = ""
-        header_string.split("\n").each do |line|
-          if line.scan(/[^\\]"/).length % 2 == 0 # ]/
-            header_lines << line_buffer + line
-            line_buffer = ""
+        header_string.split("\r\n").each do |line|
+          if line.match /^([a-zA-Z0-9\-]+)[\s]*\:(.*)\z/
+            unless line_buffer.empty?
+              header_lines << line_buffer
+            end
+            line_buffer = line
+            
             next
           end
           
