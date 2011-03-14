@@ -80,6 +80,7 @@ module Net
     
     def mode_reader
       @socket.write("MODE READER\r\n");
+      _response
     end
     
     def listgroup(newsgroup = nil)
