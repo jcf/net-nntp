@@ -10,6 +10,10 @@ module Net
     include Socket::Constants
   
     def initialize(server, port = 119)
+      @server = server
+      @port = port
+      
+      reconnect
       @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
       
       begin
@@ -27,6 +31,26 @@ module Net
     
     def close
       @socket.close
+    end
+    
+    def closed?
+      @socket.closed?
+    end
+    
+    def reconnect
+      @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
+      
+      begin
+        @socket.connect(Socket.pack_sockaddr_in(@port, @server))
+      rescue Errno::EAFNOSUPPORT
+        @socket = Socket.new(AF_INET6, SOCK_STREAM, 0)
+        retry
+      end
+      
+      response = _response
+      if response.code == 400 || response.code == 502
+        raise ServiceUnavailableException.new(response_code.to_s)
+      end
     end
     
     def _response
@@ -52,6 +76,10 @@ module Net
       end
       
       obj
+    end
+    
+    def mode_reader
+      @socket.write("MODE READER\r\n");
     end
     
     def listgroup(newsgroup = nil)
