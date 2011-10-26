@@ -11,10 +11,12 @@ Gem::Specification.new do |s|
   s.summary     = %q{Net::NTTP}
   s.description = %q{Net::NTTP}
 
-  # s.rubyforge_project = 'broadcast'
+  # s.rubyforge_project = 'net-nntp'
 
-  s.add_development_dependency 'rspec',       '>= 2.7'
+  s.add_development_dependency 'rspec', '>= 2.7'
   s.add_development_dependency 'guard-rspec', '>= 0.5'
+  s.add_development_dependency 'simplecov', '>= 0.5'
+  s.add_development_dependency 'simplecov-gem-adapter', '>= 1'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

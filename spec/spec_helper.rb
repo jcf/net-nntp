@@ -1,3 +1,4 @@
 require 'rspec'
+require 'simplecov'
 $:.push File.expand_path('../../lib', __FILE__)
-require 'net/nttp'
+require 'net/nntp'
