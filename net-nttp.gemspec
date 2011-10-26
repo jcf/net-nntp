@@ -4,7 +4,7 @@ require 'net/nntp/version'
 
 Gem::Specification.new do |s|
   s.name        = 'net-nntp'
-  s.version     = Net::NTTP::VERSION
+  s.version     = Net::NNTP::VERSION
   s.authors     = ['James Conroy-Finn']
   s.email       = ['james@logi.cl']
   s.homepage    = 'https://github.com/jcf/net-nttp'

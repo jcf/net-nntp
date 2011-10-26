@@ -1,4 +1,7 @@
 require 'socket'
+
+$:.push File.expand_path('../..', __FILE__)
+
 require 'net/nntp/version'
 require 'net/nntp/article'
 require 'net/nntp/response'
@@ -10,6 +13,7 @@ module Net
 
     include Socket::Constants
 
+    attr_accessor :socket
     attr_reader :response
 
     def initialize(server, port = 119)
@@ -17,16 +21,16 @@ module Net
       @port = port
 
       reconnect
-      @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
+      self.socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 
       begin
-        @socket.connect(Socket.pack_sockaddr_in(port, server))
+        socket.connect(Socket.pack_sockaddr_in(@port, @server))
       rescue Errno::EAFNOSUPPORT
-        @socket = Socket.new(AF_INET6, SOCK_STREAM, 0)
+        self.socket = Socket.new(AF_INET6, SOCK_STREAM, 0)
         retry
       end
 
-      response = Net::NNTP::Response.parse(@socket.readline)
+      response = Net::NNTP::Response.parse(socket.readline)
 
       if response.code == 400 || response.code == 502
         raise ServiceUnavailableException.new(response_code.to_s)
@@ -34,40 +38,28 @@ module Net
     end
 
     def close
-      @socket.close
+      socket.close
     end
 
     def closed?
-      @socket.closed?
+      socket.closed?
     end
 
     def reconnect
-      @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
+      self.socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 
       begin
-        @socket.connect(Socket.pack_sockaddr_in(@port, @server))
+        socket.connect(Socket.pack_sockaddr_in(@port, @server))
       rescue Errno::EAFNOSUPPORT
-        @socket = Socket.new(AF_INET6, SOCK_STREAM, 0)
+        self.socket = Socket.new(AF_INET6, SOCK_STREAM, 0)
         retry
       end
 
-      response = Net::NNTP::Response.parse(@socket.readline)
+      response = Net::NNTP::Response.parse(socket.readline)
 
       if response.code == 400 || response.code == 502
         raise ServiceUnavailableException.new(response_code.to_s)
       end
-    end
-
-    def read_multiline(limit = nil)
-      lines, buffer = 0, ""
-      while true
-        read = @socket.readline
-        lines += 1
-        break if lines == limit || read.strip == '.'
-        buffer += read
-      end
-
-      buffer
     end
 
     def self.start(server, port = 119)
@@ -136,9 +128,21 @@ module Net
 
     private
 
+    def read_multiline(limit = nil)
+      lines, buffer = 0, ""
+      while true
+        read = socket.readline
+        lines += 1
+        break if lines == limit || read.strip == '.'
+        buffer += read
+      end
+
+      buffer
+    end
+
     def ask(message)
-      @socket.write("#{message}\r\n")
-      @response = Net::NNTP::Response.parse(@socket.readline)
+      socket.write("#{message}\r\n")
+      @response = Net::NNTP::Response.parse(socket.readline)
     end
   end
 end
