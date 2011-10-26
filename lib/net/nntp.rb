@@ -92,7 +92,7 @@ module Net
         return read_multiline.split("\n").map {|n| n.strip.to_i}
       end
 
-      return [ ]
+      return []
     end
 
     def article(message_id)
@@ -121,9 +121,7 @@ module Net
       @socket.write("GROUP #{newsgroup}\r\n")
       response = _response
 
-      return true if response.code == 211
-
-      false
+      response.code == 211
     end
 
     def auth(username, password)
