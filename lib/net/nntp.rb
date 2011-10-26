@@ -10,6 +10,8 @@ module Net
 
     include Socket::Constants
 
+    attr_reader :response
+
     def initialize(server, port = 119)
       @server = server
       @port = port
@@ -24,7 +26,8 @@ module Net
         retry
       end
 
-      response = _response
+      response = Net::NNTP::Response.parse(@socket.readline)
+
       if response.code == 400 || response.code == 502
         raise ServiceUnavailableException.new(response_code.to_s)
       end
@@ -48,14 +51,11 @@ module Net
         retry
       end
 
-      response = _response
+      response = Net::NNTP::Response.parse(@socket.readline)
+
       if response.code == 400 || response.code == 502
         raise ServiceUnavailableException.new(response_code.to_s)
       end
-    end
-
-    def _response
-      Net::NNTP::Response.parse(@socket.readline)
     end
 
     def read_multiline(limit = nil)
@@ -81,13 +81,11 @@ module Net
     end
 
     def mode_reader
-      @socket.write("MODE READER\r\n");
-      _response
+      ask('MODE READER')
     end
 
     def listgroup(newsgroup = nil, limit = nil)
-      @socket.write("LISTGROUP #{newsgroup}\r\n")
-      response = _response
+      ask("LISTGROUP #{newsgroup}")
 
       if response.code == 211
         return read_multiline(limit).split("\n").map {|n| n.strip.to_i}
@@ -97,8 +95,7 @@ module Net
     end
 
     def article(message_id)
-      @socket.write("ARTICLE #{message_id}\r\n")
-      response = _response
+      ask("ARTICLE #{message_id}")
 
       if response.code == 220
         return Net::NNTP::Article.parse(read_multiline)
@@ -108,8 +105,7 @@ module Net
     end
 
     def head(message_id)
-      @socket.write("HEAD #{message_id}\r\n")
-      response = _response
+      ask("HEAD #{message_id}")
 
       if response.code == 221
         return Net::NNTP::Article.parse(read_multiline)
@@ -119,27 +115,30 @@ module Net
     end
 
     def group(newsgroup)
-      @socket.write("GROUP #{newsgroup}\r\n")
-      response = _response
-
+      ask("GROUP #{newsgroup}")
       response.code == 211
     end
 
     def auth(username, password)
-      @socket.write("AUTHINFO USER #{username}\r\n")
-      response = _response
+      ask("AUTHINFO USER #{username}")
 
       if response.code == 281
         return true
       elsif response.code == 381
-        @socket.write("AUTHINFO PASS #{password}\r\n")
-        response = _response
+        ask("AUTHINFO PASS #{password}")
         if response.code == 281
           return true
         end
       end
 
       false
+    end
+
+    private
+
+    def ask(message)
+      @socket.write("#{message}\r\n")
+      @response = Net::NNTP::Response.parse(@socket.readline)
     end
   end
 end
