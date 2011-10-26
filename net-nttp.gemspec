@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   # s.rubyforge_project = 'net-nntp'
 
+  s.add_development_dependency 'rake', '>= 0.9'
   s.add_development_dependency 'rspec', '>= 2.7'
   s.add_development_dependency 'guard-rspec', '>= 0.5'
   s.add_development_dependency 'simplecov', '>= 0.5'
