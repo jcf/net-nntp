@@ -58,11 +58,12 @@ module Net
       Net::NNTP::Response.parse(@socket.readline)
     end
 
-    def read_multiline
-      buffer = ""
+    def read_multiline(limit = nil)
+      lines, buffer = 0, ""
       while true
         read = @socket.readline
-        break if read.strip == "."
+        lines += 1
+        break if lines == limit || read.strip == '.'
         buffer += read
       end
 
@@ -84,12 +85,12 @@ module Net
       _response
     end
 
-    def listgroup(newsgroup = nil)
+    def listgroup(newsgroup = nil, limit = nil)
       @socket.write("LISTGROUP #{newsgroup}\r\n")
       response = _response
 
       if response.code == 211
-        return read_multiline.split("\n").map {|n| n.strip.to_i}
+        return read_multiline(limit).split("\n").map {|n| n.strip.to_i}
       end
 
       return []
